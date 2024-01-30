@@ -2,8 +2,11 @@
 from utils import show
 import numpy as np
 import torch
+import torchvision
+import torchvision.transforms as transforms
 from skimage.draw import line_aa, rectangle_perimeter, ellipse_perimeter
 from torchvision.transforms import v2
+from typing import Tuple
 
 
 class Draw:
@@ -20,17 +23,33 @@ class Draw:
     """
 
     def __init__(self, img_size: int, rng: np.random.Generator) -> None:
-
         self.img_size = img_size
         self.rng = rng
-
+        self.stickman_dataset = self.load_stickman_images()
         return None
 
-    def load_stickman_images(self) -> list:
+    def load_stickman_images(self) -> torchvision.datasets.ImageFolder:
         """
         Loads the stickman images from the stickman folder.
         """
-        pass
+        transform = transforms.Compose([
+            transforms.Resize((100, 100)),
+            transforms.Grayscale(),
+            transforms.ToTensor(),
+            transforms.Lambda(lambda x: 1-x),
+        ])
+
+        dataset_folder = "dataset"
+        dataset = torchvision.datasets.ImageFolder(
+            root=dataset_folder, transform=transform)
+        return dataset
+
+    def get_random_stickman(self) -> torch.Tensor:
+        """
+        Returns a random stickman image.
+        """
+        idx = self.rng.integers(low=0, high=len(self.stickman_dataset))
+        return self.stickman_dataset[idx][0]
 
     def get_empty_image(self) -> torch.Tensor:
         """
@@ -47,10 +66,18 @@ class Draw:
         res = rotater(image)
         return res
 
+    def resize_image_random(self, image: torch.Tensor) -> Tuple[torch.Tensor, int]:
+        """
+        Resizes the image by a random factor.
+        """
+        random_size = self.rng.integers(
+            low=self.img_size/8, high=self.img_size/4)
+        resizer = v2.Resize(
+            size=(int(random_size), int(random_size)), antialias=True)
+        res = resizer(image)
+        return res, random_size
+
     def rectangle_outline(self):
-        """
-        Returns the image coordinates of a rectangle outline
-        """
         # generate start and end points for rectangle
         a, b = self.rng.integers(low=0, high=self.img_size, size=2)
         c, d = self.rng.integers(low=0, high=self.img_size, size=2)
@@ -68,9 +95,6 @@ class Draw:
         return img
 
     def line(self):
-        """
-        Returns the image coordinates of a line.
-        """
         # Randomly choose the start and end coordinates.
         a, b = self.rng.integers(low=0, high=self.img_size, size=2)
         c, d = self.rng.integers(low=0, high=self.img_size, size=2)
@@ -83,9 +107,6 @@ class Draw:
         return line
 
     def ellipse(self):
-        """
-        Returns the image coordinates of an ellipse.
-        """
         # Random centre coordinate
         r, c = self.rng.integers(
             low=self.img_size/3, high=self.img_size/1.5, size=2)
@@ -108,13 +129,41 @@ class Draw:
         """
         Returns the image coordinates of a stickman
         """
+        stickman = self.get_random_stickman()
+        stickman = self.rotate_image_random(stickman)
+        stickman, stickman_size = self.resize_image_random(stickman)
+        img = self.get_empty_image()
+
+        print("img", img.shape)
+        print("stickman", stickman.shape, stickman_size)
+
+        # get random coordinates
+        a, b = self.rng.integers(
+            low=0, high=self.img_size-stickman_size, size=2)
+        # print("a, b", a, b)
+
+        # large = img.unsqueeze(0)
+        # small = stickman
+
+        # # print shapes
+        # print("large", large.shape)
+        # print("small", small.shape)
+
+        # large[a:a+small.shape[0], b:b+small.shape[1]] = small
+        padder = v2.Pad(padding=(a, b, self.img_size-a-stickman_size,
+                        self.img_size-b-stickman_size), fill=0, padding_mode='constant')
+        img = padder(stickman)
+        return img
 
 
-
-img_size = 1000
+img_size = 500
 rng = np.random.default_rng()
 
 draw = Draw(img_size, rng)
 
 test = draw.ellipse()
 show(test)
+
+stickman = draw.stickman()
+show(stickman)
+stickman.shape, stickman.dtype, stickman.max(), stickman.min()
