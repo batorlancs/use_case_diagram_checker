@@ -12,7 +12,7 @@ gs_range_0_lo = 200
 gs_range_0_hi = 255
 gs_range_1_lo = 0
 gs_range_1_hi = 100
-rand_seed = 12345
+rand_seed = 123
 display_size = 30
 target_box = True
 target_mask = True
@@ -24,12 +24,6 @@ instance_seg_dm = ObjectDetection_DM(
     shapes_per_image=(shapes_per_img_lo, shapes_per_img_hi),
     class_probs=(class_prob_1, class_prob_2, class_prob_3),
     rand_seed=rand_seed,
-    class_map={
-        0: {"name": "background", "gs_range": (gs_range_0_lo, gs_range_0_hi), "target_color": (255, 255, 255)},
-        1: {"name": "rectangle", "gs_range": (gs_range_1_lo, gs_range_1_hi), "target_color": (255, 0, 0)},
-        2: {"name": "line", "gs_range": (0, 100), "target_color": (0, 255, 0)},
-        3: {"name": "donut", "gs_range": (0, 100), "target_color": (0, 0, 255)},
-    },
     target_masks=True,
     dataloader_shuffle={"train": False, "val": False, "test": False},
 )

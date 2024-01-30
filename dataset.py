@@ -1,6 +1,6 @@
 import torch
 import numpy as np
-from skimage.draw import line_aa
+from skimage.draw import line_aa, circle_perimeter_aa
 
 
 class Draw:
@@ -16,7 +16,7 @@ class Draw:
 
     """
 
-    def __init__(self, img_size, rng):
+    def __init__(self, img_size: int, rng: np.random.Generator):
 
         self.img_size = img_size
         self.rng = rng
@@ -47,16 +47,19 @@ class Draw:
         Returns the image coordinates of a line.
         """
         # Randomly choose the start and end coordinates.
-        a, b = self.rng.integers(0, self.img_size / 3, size=2)
-        c, d = self.rng.integers(self.img_size / 2, self.img_size, size=2)
+        a, b = self.rng.integers(low=0, high=self.img_size, size=2)
+        c, d = self.rng.integers(low=0, high=self.img_size, size=2)
+
+        # print (a,b,c,d)
+        print(f"(a,b) = ({a},{b}), (c,d) = ({c},{d})")
 
         # Flip a coin to see if slope of line is + or -.
-        coin_flip = self.rng.integers(low=0, high=2)
-        # Use a skimage.draw method to draw the line.
-        if coin_flip:
-            xx, yy, _ = line_aa(a, b, c, d)
-        else:
-            xx, yy, _ = line_aa(a, d, c, b)
+        # coin_flip = self.rng.integers(low=0, high=2)
+        # # Use a skimage.draw method to draw the line.
+        # if coin_flip:
+        xx, yy, _ = line_aa(a, b, c, d)
+        # else:
+        #     xx, yy, _ = line_aa(a, d, c, b)
 
         line = xx, yy
 
@@ -86,6 +89,31 @@ class Draw:
         )
 
         return donut
+    
+    def stickman(self):
+        """
+        Returns the image coordinates of a stickman.
+        """
+        # Randomly choose the start and end coordinates.
+        a, b = self.rng.integers(0, self.img_size / 3, size=2)
+        c, d = self.rng.integers(self.img_size / 2, self.img_size, size=2)
+
+        # Flip a coin to see if slope of line is + or -.
+        coin_flip = self.rng.integers(low=0, high=2)
+        # Use a skimage.draw method to draw the line.
+        if coin_flip:
+            xx, yy, _ = line_aa(a, b, c, d)
+        else:
+            xx, yy, _ = line_aa(a, d, c, b)
+
+        line = xx, yy
+
+        # draw a circle around the end of the line
+        circle = circle_perimeter_aa(c, d, self.rng.integers(0, self.img_size / 3))
+
+    
+    def arrow(self):
+        return None
 
 
 class CV_DS_Base(torch.utils.data.Dataset):
@@ -191,6 +219,10 @@ class CV_DS_Base(torch.utils.data.Dataset):
             shape = self.draw.line()
         elif self.class_map[class_id]["name"] == "donut":
             shape = self.draw.donut()
+        elif self.class_map[class_id]["name"] == "stickman":
+            shape = self.draw.stickman()
+        elif self.class_map[class_id]["name"] == "arrow":
+            shape = self.draw.arrow()
 
         else:
             raise ValueError(
