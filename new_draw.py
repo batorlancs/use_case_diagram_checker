@@ -126,9 +126,6 @@ class Draw:
         return img
 
     def stickman(self):
-        """
-        Returns the image coordinates of a stickman
-        """
         stickman = self.get_random_stickman()
         stickman = self.rotate_image_random(stickman)
         stickman, stickman_size = self.resize_image_random(stickman)
@@ -140,19 +137,43 @@ class Draw:
         # get random coordinates
         a, b = self.rng.integers(
             low=0, high=self.img_size-stickman_size, size=2)
-        # print("a, b", a, b)
 
-        # large = img.unsqueeze(0)
-        # small = stickman
-
-        # # print shapes
-        # print("large", large.shape)
-        # print("small", small.shape)
-
-        # large[a:a+small.shape[0], b:b+small.shape[1]] = small
-        padder = v2.Pad(padding=(a, b, self.img_size-a-stickman_size,
-                        self.img_size-b-stickman_size), fill=0, padding_mode='constant')
+        # pad the image with zeros
+        padding=(a, b, self.img_size-a-stickman_size,
+                        self.img_size-b-stickman_size)
+        padder = v2.Pad(padding=padding, fill=0, padding_mode='constant')
         img = padder(stickman)
+        return img
+    
+    def dashed_arrow(self):
+        GAP = 10
+        DASH = 30
+
+        # Randomly choose the start and end coordinates.
+        a, b = self.rng.integers(low=0, high=self.img_size, size=2)
+        c, d = self.rng.integers(low=0, high=self.img_size, size=2)
+
+        # print(f"(a,b) = ({a},{b}), (c,d) = ({c},{d})")
+        xx, yy, _ = line_aa(a, b, c, d)
+
+        points_to_remove = []
+        # keep 20 points then remove 10 points
+        for i in range(len(xx)):
+            if i % (GAP + DASH) >= DASH:
+                points_to_remove.append(i)
+
+        xx = np.delete(xx, points_to_remove)
+        yy = np.delete(yy, points_to_remove)
+
+        print(xx)
+
+        print("dashed arrow")
+        print(xx, yy)
+        print(xx.shape, yy.shape)
+
+        line = xx, yy
+        img = self.get_empty_image()
+        img[line] = 1
         return img
 
 
@@ -166,4 +187,8 @@ show(test)
 
 stickman = draw.stickman()
 show(stickman)
+
+arrow = draw.dashed_arrow()
+show(arrow)
+
 stickman.shape, stickman.dtype, stickman.max(), stickman.min()
