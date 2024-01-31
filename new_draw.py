@@ -4,7 +4,7 @@ import numpy as np
 import torch
 import torchvision
 import torchvision.transforms as transforms
-from skimage.draw import line_aa, rectangle_perimeter, ellipse_perimeter
+from skimage.draw import line_aa, rectangle_perimeter, ellipse_perimeter, disk
 from torchvision.transforms import v2
 from typing import Tuple
 
@@ -139,12 +139,12 @@ class Draw:
             low=0, high=self.img_size-stickman_size, size=2)
 
         # pad the image with zeros
-        padding=(a, b, self.img_size-a-stickman_size,
-                        self.img_size-b-stickman_size)
+        padding = (a, b, self.img_size-a-stickman_size,
+                   self.img_size-b-stickman_size)
         padder = v2.Pad(padding=padding, fill=0, padding_mode='constant')
         img = padder(stickman)
         return img
-    
+
     def dashed_arrow(self):
         GAP = 10
         DASH = 30
@@ -165,15 +165,70 @@ class Draw:
         xx = np.delete(xx, points_to_remove)
         yy = np.delete(yy, points_to_remove)
 
-        print(xx)
+        # print(xx)
 
-        print("dashed arrow")
-        print(xx, yy)
-        print(xx.shape, yy.shape)
+        # print("dashed arrow")
+        # print(xx, yy)
+        # print(xx.shape, yy.shape)
 
         line = xx, yy
         img = self.get_empty_image()
         img[line] = 1
+
+        # add arrow head
+        vx = c - a
+        vy = d - b
+
+        # normalize
+        norm = np.sqrt(vx**2 + vy**2)
+        vx /= norm
+        vy /= norm
+        perpendicular_vx = -vy
+        perpendicular_vy = vx
+
+        # print out
+        print(f"a, b = {a}, {b}")
+        print(f"c, d = {c}, {d}")
+        print(f"vx, vy = {vx}, {vy}")
+        print(f"perp vx, vy = {perpendicular_vx}, {perpendicular_vy}")
+        print(f"norm = {norm}")
+
+        # draw circle in a,b and c,d points
+        # start_circle = disk(center=(a, b), radius=5,
+        #                     shape=(self.img_size, self.img_size))
+        # img[start_circle] = 1
+
+        # get point on the line random pixels from the start
+        distance = self.rng.integers(low=10, high=50)
+        x, y = a + vx * distance, b + vy * distance
+
+        # draw circle in x,y
+        # end_circle = disk(center=(x, y), radius=5,
+        #                   shape=(self.img_size, self.img_size))
+        
+        # img[end_circle] = 1
+
+        # get two points on the perpendicular line
+        perpendicular_distance = self.rng.integers(low=10, high=20)
+        x1, y1 = x + perpendicular_vx * perpendicular_distance, y + perpendicular_vy * perpendicular_distance
+        x2, y2 = x - perpendicular_vx * perpendicular_distance, y - perpendicular_vy * perpendicular_distance
+
+        # draw circles
+        circle1 = disk(center=(x1, y1), radius=2,
+                       shape=(self.img_size, self.img_size))
+        circle2 = disk(center=(x2, y2), radius=2,
+                          shape=(self.img_size, self.img_size))
+        img[circle1] = 1
+        img[circle2] = 1
+
+        xx1, yy1, _ = line_aa(int(x1), int(y1), int(a), int(b))
+        line1 = xx1, yy1
+        img[line1] = 1
+
+        xx2, yy2, _ = line_aa(int(x2), int(y2), int(a), int(b))
+        line2 = xx2, yy2
+        img[line2] = 1
+
         return img
 
 
