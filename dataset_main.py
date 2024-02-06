@@ -1,8 +1,7 @@
 import torch
 import numpy as np
-
 from dataset import CV_DS_Base
-from torchvision.ops.boxes import masks_to_boxes
+from torchvision.ops import masks_to_boxes
 
 
 class ObjectDetection_DS(CV_DS_Base):
@@ -58,7 +57,7 @@ class ObjectDetection_DS(CV_DS_Base):
         ds_size=100,
         img_size=256,
         shapes_per_image=(1, 3),
-        class_probs=(1, 1, 1),
+        class_probs=(1, 1, 1, 1, 1),
         rand_seed=12345,
         class_map={
             0: {
@@ -68,7 +67,9 @@ class ObjectDetection_DS(CV_DS_Base):
             },
             1: {"name": "rectangle", "gs_range": (0, 100), "target_color": (255, 0, 0)},
             2: {"name": "line", "gs_range": (0, 100), "target_color": (0, 255, 0)},
-            3: {"name": "donut", "gs_range": (0, 100), "target_color": (0, 0, 255)},
+            3: {"name": "ellipse", "gs_range": (0, 100), "target_color": (0, 0, 255)},
+            4: {"name": "stickman", "gs_range": (0, 100), "target_color": (0, 255, 255)},
+            5: {"name": "arrow", "gs_range": (0, 100), "target_color": (255, 255, 0)},
         },
         target_masks=False,
     ):
@@ -126,10 +127,23 @@ class ObjectDetection_DS(CV_DS_Base):
             for i, class_id in enumerate(chosen_ids):
                 shape = self.draw_shape(class_id)
                 gs_range = self.class_map[class_id]["gs_range"]
-                img[shape] = self.rng.integers(
-                    gs_range[0], gs_range[1], img[shape].shape
-                )
-                masks[i][shape] = 1
+                # img[shape] = self.rng.integers(
+                #    gs_range[0], gs_range[1], img[shape].shape
+                # )
+                # masks[i][shape] = 1
+                # print(class_id, shape)
+
+                # get indexes where shape img has higher value then threshold
+                print("class_id: ", class_id)
+                threshold = .5
+                indexes = torch.where(shape.squeeze() > threshold)
+                print("shape: ", shape, shape.shape)
+                print("max value in shape", torch.max(shape))
+                print("indexes: ", indexes)
+
+                # set img to shape img where shape img has higher value then img
+                img[indexes] = self.rng.integers(gs_range[0], gs_range[1])
+                masks[i][indexes] = 1
 
             # Convert from np to torch and assign appropriate dtypes.
             img = torch.from_numpy(img)

@@ -4,10 +4,12 @@ from torchvision.utils import make_grid
 
 img_size = 400
 shapes_per_img_lo = 3
-shapes_per_img_hi = 5
+shapes_per_img_hi = 6
 class_prob_1 = 1
 class_prob_2 = 1
 class_prob_3 = 1
+class_prob_4 = 1
+class_prob_5 = 1
 gs_range_0_lo = 200
 gs_range_0_hi = 255
 gs_range_1_lo = 0
@@ -22,7 +24,7 @@ instance_seg_dm = ObjectDetection_DM(
     img_size=img_size,
     train_val_split=(.6, .4),
     shapes_per_image=(shapes_per_img_lo, shapes_per_img_hi),
-    class_probs=(class_prob_1, class_prob_2, class_prob_3),
+    class_probs=(class_prob_1, class_prob_2, class_prob_3, class_prob_4, class_prob_5),
     rand_seed=rand_seed,
     target_masks=True,
     dataloader_shuffle={"train": False, "val": False, "test": False},

@@ -153,23 +153,15 @@ class Draw:
         a, b = self.rng.integers(low=0, high=self.img_size, size=2)
         c, d = self.rng.integers(low=0, high=self.img_size, size=2)
 
-        # print(f"(a,b) = ({a},{b}), (c,d) = ({c},{d})")
         xx, yy, _ = line_aa(a, b, c, d)
 
         points_to_remove = []
-        # keep 20 points then remove 10 points
         for i in range(len(xx)):
             if i % (GAP + DASH) >= DASH:
                 points_to_remove.append(i)
 
         xx = np.delete(xx, points_to_remove)
         yy = np.delete(yy, points_to_remove)
-
-        # print(xx)
-
-        # print("dashed arrow")
-        # print(xx, yy)
-        # print(xx.shape, yy.shape)
 
         line = xx, yy
         img = self.get_empty_image()
@@ -193,33 +185,14 @@ class Draw:
         print(f"perp vx, vy = {perpendicular_vx}, {perpendicular_vy}")
         print(f"norm = {norm}")
 
-        # draw circle in a,b and c,d points
-        # start_circle = disk(center=(a, b), radius=5,
-        #                     shape=(self.img_size, self.img_size))
-        # img[start_circle] = 1
-
         # get point on the line random pixels from the start
         distance = self.rng.integers(low=10, high=50)
         x, y = a + vx * distance, b + vy * distance
-
-        # draw circle in x,y
-        # end_circle = disk(center=(x, y), radius=5,
-        #                   shape=(self.img_size, self.img_size))
-        
-        # img[end_circle] = 1
 
         # get two points on the perpendicular line
         perpendicular_distance = self.rng.integers(low=10, high=20)
         x1, y1 = x + perpendicular_vx * perpendicular_distance, y + perpendicular_vy * perpendicular_distance
         x2, y2 = x - perpendicular_vx * perpendicular_distance, y - perpendicular_vy * perpendicular_distance
-
-        # draw circles
-        circle1 = disk(center=(x1, y1), radius=2,
-                       shape=(self.img_size, self.img_size))
-        circle2 = disk(center=(x2, y2), radius=2,
-                          shape=(self.img_size, self.img_size))
-        img[circle1] = 1
-        img[circle2] = 1
 
         xx1, yy1, _ = line_aa(int(x1), int(y1), int(a), int(b))
         line1 = xx1, yy1

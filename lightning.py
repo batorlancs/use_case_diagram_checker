@@ -66,7 +66,7 @@ class ObjectDetection_DM(pl.LightningDataModule):
         dataloader_shuffle={"train": True, "val": False, "test": False},
         img_size=50,
         shapes_per_image=(1, 3),
-        class_probs=(1, 1, 1),
+        class_probs=(1, 1, 1, 1, 1),
         rand_seed=12345,
         class_map={
             0: {
@@ -76,7 +76,9 @@ class ObjectDetection_DM(pl.LightningDataModule):
             },
             1: {"name": "rectangle", "gs_range": (0, 100), "target_color": (255, 0, 0)},
             2: {"name": "line", "gs_range": (0, 100), "target_color": (0, 255, 0)},
-            3: {"name": "donut", "gs_range": (0, 100), "target_color": (0, 0, 255)},
+            3: {"name": "ellipse", "gs_range": (0, 100), "target_color": (0, 0, 255)},
+            4: {"name": "stickman", "gs_range": (0, 100), "target_color": (0, 255, 255)},
+            5: {"name": "arrow", "gs_range": (0, 100), "target_color": (255, 255, 0)},
         },
         target_masks=False,
     ):
