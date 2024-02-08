@@ -3,7 +3,7 @@ import torch
 import torchvision
 import torchvision.transforms as transforms
 
-from skimage.draw import line_aa, rectangle_perimeter, ellipse_perimeter, disk
+from skimage.draw import line_aa, rectangle_perimeter, ellipse_perimeter
 from torchvision.transforms import v2
 from typing import Tuple
 
@@ -18,9 +18,7 @@ class Draw:
     img_size (int): draws onto 2d array of shape (img_size, img_size).
     rng (Generator): used for enabling deterministic behaviour. Example 
         of valid rng: rng = np.random.default_rng(12345)
-
     """
-
     def __init__(self, img_size: int, rng: np.random.Generator) -> None:
         self.img_size = img_size
         self.rng = rng
@@ -63,29 +61,38 @@ class Draw:
         # Rotate the shape.
         rotater = v2.RandomRotation(degrees=(0, 180))
         res = rotater(image)
+        res = torch.where(res > 0, 1, 0)
         return res
 
     def resize_image_random(self, image: torch.Tensor) -> Tuple[torch.Tensor, int]:
         """
         Resizes the image by a random factor.
         """
-        random_size = self.rng.integers(
-            low=self.img_size/8, high=self.img_size/4)
+        if self.img_size < 200:
+            random_size = self.rng.integers(
+                low=self.img_size/4, high=self.img_size/2)
+        else:
+            random_size = self.rng.integers(
+                low=self.img_size/8, high=self.img_size/4)
+            
         resizer = v2.Resize(
             size=(int(random_size), int(random_size)), antialias=True)
         res = resizer(image)
         return res, random_size
 
     def rectangle_outline(self):
-        # generate start and end points for rectangle
-        a, b = self.rng.integers(low=0, high=self.img_size, size=2)
-        c, d = self.rng.integers(low=0, high=self.img_size, size=2)
+        rec_shape_size = self.img_size/1.5
 
-        # print(f"(a,b) = ({a},{b}), (c,d) = ({c},{d})")
+        # generate start and end points for rectangle
+        # a, b = self.rng.integers(low=0, high=self.img_size, size=2)
+        # c, d = self.rng.integers(low=0, high=self.img_size, size=2)
+
+        a, b = self.rng.integers(low=self.img_size/4, high=self.img_size/1.5, size=2)
+        c, d = self.rng.integers(low=self.img_size/4, high=self.img_size/1.5, size=2)
 
         # generate the coordinates of the rectangle
         xx, yy = rectangle_perimeter(start=(a, b), end=(
-            c, d), shape=(self.img_size, self.img_size))
+            c, d), shape=(rec_shape_size, rec_shape_size))
         rectangle_outline = xx, yy
 
         img = self.get_empty_image()
@@ -105,7 +112,7 @@ class Draw:
 
         img = self.get_empty_image()
         img[line] = 1
-        return img
+        return img.unsqueeze(0)
 
     def ellipse(self):
         # Random centre coordinate
@@ -114,7 +121,9 @@ class Draw:
 
         # Random radius
         r_radius, c_radius = self.rng.integers(
-            low=self.img_size/20, high=self.img_size/4, size=2)
+            low=self.img_size/20, high=self.img_size/8, size=2)
+        if r_radius < 2 * c_radius:
+            c_radius = int(c_radius / 2)
 
         # print(f"(a,b) = ({a},{b}), (c,d) = ({c},{d})")
         xx, yy = ellipse_perimeter(
@@ -132,9 +141,6 @@ class Draw:
         stickman, stickman_size = self.resize_image_random(stickman)
         img = self.get_empty_image()
 
-        print("img", img.shape)
-        print("stickman", stickman.shape, stickman_size)
-
         # get random coordinates
         a, b = self.rng.integers(
             low=0, high=self.img_size-stickman_size, size=2)
@@ -147,12 +153,12 @@ class Draw:
         return img
 
     def dashed_arrow(self):
-        GAP = 10
-        DASH = 30
+        GAP = self.rng.integers(low=5, high=20)
+        DASH = self.rng.integers(low=10, high=30)
 
         # Randomly choose the start and end coordinates.
-        a, b = self.rng.integers(low=0, high=self.img_size, size=2)
-        c, d = self.rng.integers(low=0, high=self.img_size, size=2)
+        a, b = self.rng.integers(low=self.img_size/6, high=self.img_size/1.2, size=2)
+        c, d = self.rng.integers(low=self.img_size/6, high=self.img_size/1.2, size=2)
 
         xx, yy, _ = line_aa(a, b, c, d)
 
@@ -173,21 +179,16 @@ class Draw:
         vy = d - b
 
         # normalize
-        norm = np.sqrt(vx**2 + vy**2)
-        vx /= norm
-        vy /= norm
+        norm = max(np.sqrt(vx**2 + vy**2), 1)
+        vx = int(vx / norm)
+        vy = int(vy / norm)
         perpendicular_vx = -vy
         perpendicular_vy = vx
 
-        # print out
-        print(f"a, b = {a}, {b}")
-        print(f"c, d = {c}, {d}")
-        print(f"vx, vy = {vx}, {vy}")
-        print(f"perp vx, vy = {perpendicular_vx}, {perpendicular_vy}")
-        print(f"norm = {norm}")
-
         # get point on the line random pixels from the start
         distance = self.rng.integers(low=10, high=50)
+        distance = float(distance)  # Convert distance to float
+
         x, y = a + vx * distance, b + vy * distance
 
         # get two points on the perpendicular line
@@ -197,6 +198,12 @@ class Draw:
         x2, y2 = x - perpendicular_vx * perpendicular_distance, y - \
             perpendicular_vy * perpendicular_distance
 
+        # Ensure coordinates are within bounds
+        x1 = max(0, min(x1, self.img_size - 1))
+        y1 = max(0, min(y1, self.img_size - 1))
+        x2 = max(0, min(x2, self.img_size - 1))
+        y2 = max(0, min(y2, self.img_size - 1))
+
         xx1, yy1, _ = line_aa(int(x1), int(y1), int(a), int(b))
         line1 = xx1, yy1
         img[line1] = 1
@@ -205,4 +212,4 @@ class Draw:
         line2 = xx2, yy2
         img[line2] = 1
 
-        return img
+        return img.unsqueeze(0)

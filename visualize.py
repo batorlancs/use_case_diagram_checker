@@ -1,6 +1,7 @@
 from utils import display_boxes, display_masks_rcnn, show
 from lightning import ObjectDetection_DM
 from torchvision.utils import make_grid
+import numpy as np
 
 img_size = 400
 shapes_per_img_lo = 3
@@ -14,7 +15,7 @@ gs_range_0_lo = 200
 gs_range_0_hi = 255
 gs_range_1_lo = 0
 gs_range_1_hi = 100
-rand_seed = 123
+rand_seed = np.random.randint(0, 1000)
 display_size = 30
 target_box = True
 target_mask = True
