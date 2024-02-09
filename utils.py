@@ -7,7 +7,7 @@ import torchvision.transforms.functional as TF
 from torchvision.utils import draw_bounding_boxes, draw_segmentation_masks
 
 
-def show(imgs, figsize=(10.0, 10.0)):
+def show(imgs, figsize=(10.0, 10.0), grayscale=False):
     """Displays a single image or list of images. Taken more or less from
     the pytorch docs:
     https://pytorch.org/vision/main/auto_examples/plot_visualization_utils.html#visualizing-a-grid-of-images
@@ -26,8 +26,8 @@ def show(imgs, figsize=(10.0, 10.0)):
     _, axs = plt.subplots(ncols=len(imgs), figsize=figsize, squeeze=False)
     for i, img in enumerate(imgs):
         img = img.detach()
-        img = TF.to_pil_image(img)
-        axs[0, i].imshow(np.asarray(img))
+        img = TF.to_pil_image(img, mode="L" if grayscale else None)
+        axs[0, i].imshow(np.asarray(img), cmap="gray" if grayscale else None)
         axs[0, i].set(xticklabels=[], yticklabels=[], xticks=[], yticks=[])
     plt.show()
 

@@ -61,7 +61,7 @@ class Draw:
         # Rotate the shape.
         rotater = v2.RandomRotation(degrees=(0, 180))
         res = rotater(image)
-        res = torch.where(res > 0, 1, 0)
+        res = torch.where(res > 0, 1, 0).type(torch.uint8)
         return res
 
     def resize_image_random(self, image: torch.Tensor) -> Tuple[torch.Tensor, int]:
@@ -97,7 +97,7 @@ class Draw:
 
         img = self.get_empty_image()
         img[rectangle_outline] = 1
-        img = self.rotate_image_random(img.unsqueeze(0))
+        img = self.rotate_image_random(img.unsqueeze(0)).type(torch.uint8)
         return img
 
     def line(self):
@@ -133,7 +133,7 @@ class Draw:
         img = self.get_empty_image()
         img[ellipse] = 1
         img = self.rotate_image_random(img.unsqueeze(0))
-        return img
+        return img.type(torch.uint8)
 
     def stickman(self):
         stickman = self.get_random_stickman()
@@ -150,7 +150,7 @@ class Draw:
                    self.img_size-b-stickman_size)
         padder = v2.Pad(padding=padding, fill=0, padding_mode='constant')
         img = padder(stickman)
-        return img
+        return img.type(torch.uint8)
 
     def dashed_arrow(self):
         GAP = self.rng.integers(low=5, high=20)
