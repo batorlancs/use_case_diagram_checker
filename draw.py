@@ -20,8 +20,10 @@ class Draw:
     rng (Generator): used for enabling deterministic behaviour. Example 
         of valid rng: rng = np.random.default_rng(12345)
     """
+
     def __init__(self, img_size: int, rng: np.random.Generator) -> None:
         self.img_size = img_size
+        self.img_min_padding = ((math.sqrt(2) * img_size) - img_size) / 2
         self.rng = rng
         self.stickman_dataset = self.load_stickman_images()
         return None
@@ -75,21 +77,31 @@ class Draw:
         else:
             random_size = self.rng.integers(
                 low=self.img_size/8, high=self.img_size/4)
-            
+
         resizer = v2.Resize(
             size=(int(random_size), int(random_size)), antialias=True)
         res = resizer(image)
         return res, random_size
 
     def rectangle_outline(self):
-        rec_shape_size = self.img_size/1.5
+        """
+        Returns a binary image of a rectangle outline. (uint8)
+        """
+        rec_shape_size = self.img_size
+        minimum_gap = self.img_size/8
+        # image_padding = self.img_size/8
+        image_padding = self.img_min_padding
 
-        # generate start and end points for rectangle
-        # a, b = self.rng.integers(low=0, high=self.img_size, size=2)
-        # c, d = self.rng.integers(low=0, high=self.img_size, size=2)
-
-        a, b = self.rng.integers(low=self.img_size/4, high=self.img_size/1.5, size=2)
-        c, d = self.rng.integers(low=self.img_size/4, high=self.img_size/1.5, size=2)
+       # generate two points that connect the rectangle and make sure they are at least 1/3 of the image size apart
+        while True:
+            a, b = self.rng.integers(
+                low=image_padding, high=self.img_size-image_padding, size=2)
+            c, d = self.rng.integers(
+                low=image_padding, high=self.img_size-image_padding, size=2)
+            vx = c - a
+            vy = d - b
+            if abs(vx) > minimum_gap and abs(vy) > minimum_gap:
+                break
 
         # generate the coordinates of the rectangle
         xx, yy = rectangle_perimeter(start=(a, b), end=(
@@ -98,17 +110,24 @@ class Draw:
 
         img = self.get_empty_image()
         img[rectangle_outline] = 1
-        img = self.rotate_image_random(img.unsqueeze(0)).type(torch.uint8)
+        img = self.rotate_image_random(img.unsqueeze(0))
         return img
 
     def line(self):
-        # Randomly choose the start and end coordinates.
-        a, b = self.rng.integers(low=0, high=self.img_size, size=2)
-        c, d = self.rng.integers(low=0, high=self.img_size, size=2)
+        """
+        Returns a binary image of a line. (uint8)
+        """
+        # Choose two points that are at least 1/3 of the image size apart
+        while True:
+            a, b = self.rng.integers(low=0, high=self.img_size, size=2)
+            c, d = self.rng.integers(low=0, high=self.img_size, size=2)
+            vx = c - a
+            vy = d - b
+            norm = np.sqrt(vx**2 + vy**2)
+            if norm > self.img_size/12 and norm < self.img_size/3:
+                break
 
-        # print(f"(a,b) = ({a},{b}), (c,d) = ({c},{d})")
         xx, yy, _ = line_aa(a, b, c, d)
-
         line = xx, yy
 
         img = self.get_empty_image()
@@ -116,17 +135,24 @@ class Draw:
         return img.unsqueeze(0)
 
     def ellipse(self):
-        # Random centre coordinate
-        r, c = self.rng.integers(
-            low=self.img_size/3, high=self.img_size/1.5, size=2)
+        """
+        Returns a binary image of an ellipse. (uint8)
+        """
+        min_radius = self.img_size/12
+        max_radius = self.img_size/6
 
         # Random radius
-        r_radius, c_radius = self.rng.integers(
-            low=self.img_size/20, high=self.img_size/8, size=2)
-        if r_radius < 2 * c_radius:
-            c_radius = int(c_radius / 2)
+        r_radius = self.rng.integers(
+            low=min_radius, high=max_radius)
+        
+        # generate c_radius that is at least half as big or smaller as r_radius
+        c_radius = self.rng.integers(
+            low=r_radius//4, high=r_radius//2)
 
-        # print(f"(a,b) = ({a},{b}), (c,d) = ({c},{d})")
+        # Random centre coordinate
+        r, c = self.rng.integers(
+            low=self.img_min_padding, high=self.img_size-self.img_min_padding, size=2)
+
         xx, yy = ellipse_perimeter(
             r, c, r_radius, c_radius, shape=(self.img_size, self.img_size))
         ellipse = xx, yy
@@ -137,6 +163,9 @@ class Draw:
         return img.type(torch.uint8)
 
     def stickman(self):
+        """
+        Returns a binary image of a stickman. (uint8)
+        """
         stickman = self.get_random_stickman()
         stickman = self.rotate_image_random(stickman)
         stickman, stickman_size = self.resize_image_random(stickman)
@@ -154,14 +183,10 @@ class Draw:
         return img.type(torch.uint8)
 
     def dashed_arrow(self):
-        # GAP = self.rng.integers(low=5, high=20)
-        # DASH = self.rng.integers(low=10, high=30)
-
-        # # Randomly choose the start and end coordinates.
-        # a, b = self.rng.integers(low=self.img_size/6, high=self.img_size/1.2, size=2)
-        # c, d = self.rng.integers(low=self.img_size/6, high=self.img_size/1.2, size=2)
-
-        # Choose two start and end coordinates where the norm is at least 1/3 of the image size
+        """
+        Returns a binary image of a dashed arrow. (uint8)
+        """
+        # Choose two start and end coordinates where the norm is between the range
         while True:
             a, b = self.rng.integers(low=0, high=self.img_size, size=2)
             c, d = self.rng.integers(low=0, high=self.img_size, size=2)
@@ -173,7 +198,7 @@ class Draw:
 
         GAP = self.rng.integers(low=norm/16, high=norm/8)
         DASH = self.rng.integers(low=norm/8, high=norm/4)
-        
+
         xx, yy, _ = line_aa(a, b, c, d)
 
         points_to_remove = []
@@ -194,14 +219,14 @@ class Draw:
         perpendicular_vx = -vy
         perpendicular_vy = vx
 
-
         # get point on the line random pixels from the start
         distance = float(self.rng.integers(low=int(norm/6), high=int(norm/3)))
 
         x, y = a + vx * distance, b + vy * distance
 
         # get two points on the perpendicular line
-        perpendicular_distance = self.rng.integers(low=4, high=max(8, int(norm/4)))
+        perpendicular_distance = self.rng.integers(
+            low=4, high=max(8, int(norm/4)))
         x1, y1 = x + perpendicular_vx * perpendicular_distance, y + \
             perpendicular_vy * perpendicular_distance
         x2, y2 = x - perpendicular_vx * perpendicular_distance, y - \

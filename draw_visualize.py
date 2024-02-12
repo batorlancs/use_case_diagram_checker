@@ -6,8 +6,8 @@ rng = np.random.default_rng()
 img_size = 500
 draw = Draw(img_size, rng)
 
-rows = 6
-cols = 5
+rows = 50
+cols = 4
 
 def show_draw_function(func, rows=1, cols=5):
     n = rows * cols
@@ -24,4 +24,4 @@ def show_draw_function(func, rows=1, cols=5):
 # show_draw_function(draw.rectangle_outline, rows=rows, cols=cols)
 # show_draw_function(draw.ellipse, rows=rows, cols=cols)
 # show_draw_function(draw.stickman, rows=rows, cols=cols)
-show_draw_function(draw.dashed_arrow, rows=rows, cols=cols)
+# show_draw_function(draw.dashed_arrow, rows=rows, cols=cols)
