@@ -2,6 +2,7 @@ import numpy as np
 import torch
 import torchvision
 import torchvision.transforms as transforms
+import math
 
 from skimage.draw import line_aa, rectangle_perimeter, ellipse_perimeter
 from torchvision.transforms import v2
@@ -153,13 +154,26 @@ class Draw:
         return img.type(torch.uint8)
 
     def dashed_arrow(self):
-        GAP = self.rng.integers(low=5, high=20)
-        DASH = self.rng.integers(low=10, high=30)
+        # GAP = self.rng.integers(low=5, high=20)
+        # DASH = self.rng.integers(low=10, high=30)
 
-        # Randomly choose the start and end coordinates.
-        a, b = self.rng.integers(low=self.img_size/6, high=self.img_size/1.2, size=2)
-        c, d = self.rng.integers(low=self.img_size/6, high=self.img_size/1.2, size=2)
+        # # Randomly choose the start and end coordinates.
+        # a, b = self.rng.integers(low=self.img_size/6, high=self.img_size/1.2, size=2)
+        # c, d = self.rng.integers(low=self.img_size/6, high=self.img_size/1.2, size=2)
 
+        # Choose two start and end coordinates where the norm is at least 1/3 of the image size
+        while True:
+            a, b = self.rng.integers(low=0, high=self.img_size, size=2)
+            c, d = self.rng.integers(low=0, high=self.img_size, size=2)
+            vx = c - a
+            vy = d - b
+            norm = np.sqrt(vx**2 + vy**2)
+            if norm > self.img_size/12 and norm < self.img_size/3:
+                break
+
+        GAP = self.rng.integers(low=norm/16, high=norm/8)
+        DASH = self.rng.integers(low=norm/8, high=norm/4)
+        
         xx, yy, _ = line_aa(a, b, c, d)
 
         points_to_remove = []
@@ -174,25 +188,20 @@ class Draw:
         img = self.get_empty_image()
         img[line] = 1
 
-        # add arrow head
-        vx = c - a
-        vy = d - b
-
         # normalize
-        norm = max(np.sqrt(vx**2 + vy**2), 1)
-        vx = int(vx / norm)
-        vy = int(vy / norm)
+        vx = vx / norm
+        vy = vy / norm
         perpendicular_vx = -vy
         perpendicular_vy = vx
 
+
         # get point on the line random pixels from the start
-        distance = self.rng.integers(low=10, high=50)
-        distance = float(distance)  # Convert distance to float
+        distance = float(self.rng.integers(low=int(norm/6), high=int(norm/3)))
 
         x, y = a + vx * distance, b + vy * distance
 
         # get two points on the perpendicular line
-        perpendicular_distance = self.rng.integers(low=10, high=20)
+        perpendicular_distance = self.rng.integers(low=4, high=max(8, int(norm/4)))
         x1, y1 = x + perpendicular_vx * perpendicular_distance, y + \
             perpendicular_vy * perpendicular_distance
         x2, y2 = x - perpendicular_vx * perpendicular_distance, y - \
