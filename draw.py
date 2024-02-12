@@ -139,7 +139,7 @@ class Draw:
         Returns a binary image of an ellipse. (uint8)
         """
         min_radius = self.img_size/12
-        max_radius = self.img_size/6
+        max_radius = self.img_size/4
 
         # Random radius
         r_radius = self.rng.integers(

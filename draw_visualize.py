@@ -3,11 +3,11 @@ from utils import show
 from draw import Draw
 
 rng = np.random.default_rng()
-img_size = 500
+img_size = 300
 draw = Draw(img_size, rng)
 
-rows = 50
-cols = 4
+rows = 20
+cols = 6
 
 def show_draw_function(func, rows=1, cols=5):
     n = rows * cols
