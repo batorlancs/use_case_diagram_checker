@@ -9,7 +9,7 @@ class DrawTest(unittest.TestCase):
         self.rng = np.random.default_rng()
         self.img_sizes = [100, np.random.randint(101, 150), np.random.randint(150, 200), np.random.randint(250, 300), np.random.randint(300, 400), np.random.randint(400, 500), np.random.randint(500, 600), np.random.randint(600, 800), np.random.randint(800, 999), 1000]
         self.draw_classes = [Draw(img_size, self.rng) for img_size in self.img_sizes]
-        self.default_num_try = 100
+        self.default_num_try = 1000
         self.num_try = {
             "line": self.default_num_try,
             "rectangle": self.default_num_try,
@@ -41,12 +41,12 @@ class DrawTest(unittest.TestCase):
 
     def test_rectangle(self):
         """
-        Tests the rectangle_outline method.
+        Tests the rectangle method.
         """
         try:
             for img_size, draw in zip(self.img_sizes, self.draw_classes):
                 for _ in tqdm(range(self.num_try["rectangle"]), desc="rectangle, img_size: " + str(img_size)):
-                    rectangle = draw.rectangle_outline()
+                    rectangle = draw.rectangle()
                     self.assertEqual(rectangle.dtype, torch.uint8, "dtype: " + str(rectangle.dtype) + ", img_size: " + str(img_size))
                     self.assertEqual(rectangle.shape, (1, img_size, img_size), "shape: " + str(rectangle.shape) + ", img_size: " + str(img_size))
                     self.assertTrue(torch.max(rectangle) > 0, "max value: " + str(torch.max(rectangle)) + ", img_size: " + str(img_size))

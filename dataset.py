@@ -102,7 +102,7 @@ class CV_DS_Base(torch.utils.data.Dataset):
         """
 
         if self.class_map[class_id]["name"] == "rectangle":
-            shape = self.draw.rectangle_outline()
+            shape = self.draw.rectangle()
         elif self.class_map[class_id]["name"] == "line":
             shape = self.draw.line()
         elif self.class_map[class_id]["name"] == "ellipse":

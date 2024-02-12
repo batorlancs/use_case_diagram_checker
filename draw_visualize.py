@@ -3,7 +3,7 @@ from utils import show
 from draw import Draw
 
 rng = np.random.default_rng()
-img_size = 300
+img_size = 100
 draw = Draw(img_size, rng)
 
 rows = 20
@@ -21,7 +21,7 @@ def show_draw_function(func, rows=1, cols=5):
         show(group, grayscale=True)
 
 # show_draw_function(draw.line, rows=rows, cols=cols)
-# show_draw_function(draw.rectangle_outline, rows=rows, cols=cols)
+show_draw_function(draw.rectangle, rows=rows, cols=cols)
 # show_draw_function(draw.ellipse, rows=rows, cols=cols)
 # show_draw_function(draw.stickman, rows=rows, cols=cols)
 # show_draw_function(draw.dashed_arrow, rows=rows, cols=cols)

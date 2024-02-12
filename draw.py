@@ -23,6 +23,7 @@ class Draw:
 
     def __init__(self, img_size: int, rng: np.random.Generator) -> None:
         self.img_size = img_size
+        # minimum padding to ensure the shape is not cut off when rotated
         self.img_min_padding = ((math.sqrt(2) * img_size) - img_size) / 2
         self.rng = rng
         self.stickman_dataset = self.load_stickman_images()
@@ -83,21 +84,19 @@ class Draw:
         res = resizer(image)
         return res, random_size
 
-    def rectangle_outline(self):
+    def rectangle(self):
         """
-        Returns a binary image of a rectangle outline. (uint8)
+        Returns a binary image of a rectangle. (uint8)
         """
         rec_shape_size = self.img_size
         minimum_gap = self.img_size/8
-        # image_padding = self.img_size/8
-        image_padding = self.img_min_padding
 
        # generate two points that connect the rectangle and make sure they are at least 1/3 of the image size apart
         while True:
             a, b = self.rng.integers(
-                low=image_padding, high=self.img_size-image_padding, size=2)
+                low=self.img_min_padding, high=self.img_size-self.img_min_padding, size=2)
             c, d = self.rng.integers(
-                low=image_padding, high=self.img_size-image_padding, size=2)
+                low=self.img_min_padding, high=self.img_size-self.img_min_padding, size=2)
             vx = c - a
             vy = d - b
             if abs(vx) > minimum_gap and abs(vy) > minimum_gap:
@@ -106,10 +105,10 @@ class Draw:
         # generate the coordinates of the rectangle
         xx, yy = rectangle_perimeter(start=(a, b), end=(
             c, d), shape=(rec_shape_size, rec_shape_size))
-        rectangle_outline = xx, yy
+        rectangle = xx, yy
 
         img = self.get_empty_image()
-        img[rectangle_outline] = 1
+        img[rectangle] = 1
         img = self.rotate_image_random(img.unsqueeze(0))
         return img
 
