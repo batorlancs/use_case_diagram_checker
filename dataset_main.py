@@ -153,11 +153,9 @@ class ObjectDetection_DS(CV_DS_Base):
                 if box[2] - box[0] == 0:
                     boxes[i][0] = min(boxes[i][0]-1, 0)
                     boxes[i][2] = max(boxes[i][2]+1, self.img_size)
-                    # print("ADJUSTED X")
                 if box[3] - box[1] == 0:
                     boxes[i][1] = min(boxes[i][1]-1, 0)
                     boxes[i][3] = max(boxes[i][3]+1, self.img_size)
-                    # print("ADJUSTED Y")
 
             target["boxes"] = boxes
             target["area"] = self.boxes_area(target["boxes"])

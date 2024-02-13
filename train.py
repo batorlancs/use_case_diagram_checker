@@ -9,14 +9,14 @@ from datetime import datetime
 instance_seg_dm = ObjectDetection_DM(train_val_size=500,
                                      train_val_split=[.9, .1],
                                      test_size=12,
-                                     img_size=100,
+                                     img_size=400,
                                      batch_size=4,
-                                     shapes_per_image=(1, 1),
-                                     class_probs=(1, 1, 0, 0, 0),
+                                     shapes_per_image=(1, 4),
+                                     class_probs=(1, 1, 1, 1, 1),
                                      target_masks=True)
 
 # Create Instance of Lightning Module. num_classes = num_shapes + 1 (for background)
-instance_seg_lm = InstanceSeg_LM(num_classes=3, lr=1e-4, pretrained=True)
+instance_seg_lm = InstanceSeg_LM(num_classes=6, lr=1e-4, pretrained=True)
 
 # Create callback for ModelCheckpoints.
 checkpoint_callback = ModelCheckpoint(filename='{epoch:02d}', save_top_k=30, monitor="Loss/train_loss", every_n_epochs=1)
