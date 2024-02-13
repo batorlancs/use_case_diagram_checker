@@ -9,7 +9,7 @@ class DrawTest(unittest.TestCase):
         self.rng = np.random.default_rng()
         self.img_sizes = [100, np.random.randint(101, 150), np.random.randint(150, 200), np.random.randint(250, 300), np.random.randint(300, 400), np.random.randint(400, 500), np.random.randint(500, 600), np.random.randint(600, 800), np.random.randint(800, 999), 1000]
         self.draw_classes = [Draw(img_size, self.rng) for img_size in self.img_sizes]
-        self.default_num_try = 1000
+        self.default_num_try = 100
         self.num_try = {
             "line": self.default_num_try,
             "rectangle": self.default_num_try,

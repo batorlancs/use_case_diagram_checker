@@ -11,7 +11,7 @@ instance_seg_dm = ObjectDetection_DM(train_val_size=500,
                                      test_size=12,
                                      img_size=100,
                                      batch_size=4,
-                                     shapes_per_image=(1, 2),
+                                     shapes_per_image=(1, 1),
                                      class_probs=(1, 1, 0, 0, 0),
                                      target_masks=True)
 

@@ -128,13 +128,8 @@ class ObjectDetection_DS(CV_DS_Base):
                 shape = self.draw_shape(class_id)
                 gs_range = self.class_map[class_id]["gs_range"]
 
-                # get indexes where shape img has higher value then threshold
-                print("class_id: ", class_id)
-                threshold = .8
+                threshold = .1
                 indexes = torch.where(shape.squeeze() > threshold)
-                print("shape: ", shape, shape.shape)
-                print("max value in shape", torch.max(shape))
-                print("indexes: ", indexes)
 
                 # set img to shape img where shape img has higher value then img
                 img[indexes] = self.rng.integers(gs_range[0], gs_range[1])
@@ -158,11 +153,11 @@ class ObjectDetection_DS(CV_DS_Base):
                 if box[2] - box[0] == 0:
                     boxes[i][0] = min(boxes[i][0]-1, 0)
                     boxes[i][2] = max(boxes[i][2]+1, self.img_size)
-                    print("ADJUSTED X")
+                    # print("ADJUSTED X")
                 if box[3] - box[1] == 0:
                     boxes[i][1] = min(boxes[i][1]-1, 0)
                     boxes[i][3] = max(boxes[i][3]+1, self.img_size)
-                    print("ADJUSTED Y")
+                    # print("ADJUSTED Y")
 
             target["boxes"] = boxes
             target["area"] = self.boxes_area(target["boxes"])
