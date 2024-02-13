@@ -21,7 +21,7 @@ def show_draw_function(func, rows=1, cols=5):
         show(group, grayscale=True)
 
 # show_draw_function(draw.line, rows=rows, cols=cols)
-show_draw_function(draw.rectangle, rows=rows, cols=cols)
+# show_draw_function(draw.rectangle, rows=rows, cols=cols)
 # show_draw_function(draw.ellipse, rows=rows, cols=cols)
 # show_draw_function(draw.stickman, rows=rows, cols=cols)
 # show_draw_function(draw.dashed_arrow, rows=rows, cols=cols)

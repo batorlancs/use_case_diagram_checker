@@ -181,6 +181,7 @@ class ObjectDetection_DM(pl.LightningDataModule):
             batch_size=self.batch_size,
             shuffle=self.dataloader_shuffle["train"],
             collate_fn=self.custom_collate,
+            num_workers=15,
         )
 
     def val_dataloader(self):
@@ -189,6 +190,7 @@ class ObjectDetection_DM(pl.LightningDataModule):
             batch_size=self.batch_size,
             shuffle=self.dataloader_shuffle["val"],
             collate_fn=self.custom_collate,
+            num_workers=15,
         )
 
     def test_dataloader(self):
@@ -197,4 +199,5 @@ class ObjectDetection_DM(pl.LightningDataModule):
             batch_size=self.batch_size,
             shuffle=self.dataloader_shuffle["test"],
             collate_fn=self.custom_collate,
+            num_workers=15,
         )

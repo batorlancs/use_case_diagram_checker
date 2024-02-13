@@ -127,15 +127,10 @@ class ObjectDetection_DS(CV_DS_Base):
             for i, class_id in enumerate(chosen_ids):
                 shape = self.draw_shape(class_id)
                 gs_range = self.class_map[class_id]["gs_range"]
-                # img[shape] = self.rng.integers(
-                #    gs_range[0], gs_range[1], img[shape].shape
-                # )
-                # masks[i][shape] = 1
-                # print(class_id, shape)
 
                 # get indexes where shape img has higher value then threshold
                 print("class_id: ", class_id)
-                threshold = .5
+                threshold = .8
                 indexes = torch.where(shape.squeeze() > threshold)
                 print("shape: ", shape, shape.shape)
                 print("max value in shape", torch.max(shape))
@@ -155,7 +150,21 @@ class ObjectDetection_DS(CV_DS_Base):
             # Fill in the target dictionary.
             if self.target_masks:
                 target["masks"] = masks
-            target["boxes"] = masks_to_boxes(masks)
+            boxes = masks_to_boxes(masks)
+
+            # check if boxes height or width is 0
+            # if so, set the box to the entire image
+            for i, box in enumerate(boxes):
+                if box[2] - box[0] == 0:
+                    boxes[i][0] = min(boxes[i][0]-1, 0)
+                    boxes[i][2] = max(boxes[i][2]+1, self.img_size)
+                    print("ADJUSTED X")
+                if box[3] - box[1] == 0:
+                    boxes[i][1] = min(boxes[i][1]-1, 0)
+                    boxes[i][3] = max(boxes[i][3]+1, self.img_size)
+                    print("ADJUSTED Y")
+
+            target["boxes"] = boxes
             target["area"] = self.boxes_area(target["boxes"])
             target["labels"] = chosen_ids
             target["image_id"] = torch.tensor([idx])

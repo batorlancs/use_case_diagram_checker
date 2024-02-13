@@ -2,6 +2,9 @@ import torch
 import matplotlib.pyplot as plt
 import numpy as np
 import torchvision.transforms.functional as TF
+import torchvision
+from torchvision.models.detection.faster_rcnn import FastRCNNPredictor
+from torchvision.models.detection.mask_rcnn import MaskRCNNPredictor
 
 
 from torchvision.utils import draw_bounding_boxes, draw_segmentation_masks
@@ -190,3 +193,38 @@ def display_masks_rcnn(imgs, target_pred_dict, class_map, threshold=0.5, alpha=0
     ]
 
     return result_imgs
+
+def get_maskrcnn(num_classes=4, pretrained=True):
+    """A function for loading the PyTorch implimentation of MaskRCNN.
+    To not have predictor changed at all set num_classes = -1.
+    See here for documentation on the input and output specifics:
+    https://pytorch.org/vision/0.12/generated/torchvision.models.detection.maskrcnn_resnet50_fpn.html
+
+    Args:
+        num_classes (int): number of output classes desired.
+        pretrained (bool): whether or not to load a model pretrained on the COCO dataset. 
+    """
+
+    if pretrained:
+        model = torchvision.models.detection.maskrcnn_resnet50_fpn(weights="DEFAULT")
+    else:
+        model = torchvision.models.detection.maskrcnn_resnet50_fpn(weights=None)
+
+    if num_classes != -1:
+
+        # Get number of input features for the classifier.
+        in_features = model.roi_heads.box_predictor.cls_score.in_features
+
+        # Replace the pre-trained box predictor head with a new one.
+        model.roi_heads.box_predictor = FastRCNNPredictor(in_features, num_classes)
+
+        # Now get the number of input features for the mask classifier.
+        in_features_mask = model.roi_heads.mask_predictor.conv5_mask.in_channels
+
+        hidden_layer = 256
+        # Replace the pre-trained mask predictor head with a new one.
+        model.roi_heads.mask_predictor = MaskRCNNPredictor(
+            in_features_mask, hidden_layer, num_classes
+        )
+
+    return model
