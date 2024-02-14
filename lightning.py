@@ -128,7 +128,7 @@ class ObjectDetection_DM(pl.LightningDataModule):
         targets = []
 
         for img, target in batch:
-            imgs.append(img)
+            imgs.append(img.float())
             targets.append(target)
 
         # Converts list of tensor images (of shape (3,H,W) and len batch_size)
