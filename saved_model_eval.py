@@ -5,18 +5,18 @@ from torchvision.utils import make_grid
 
 device = torch.device('cuda') if torch.cuda.is_available() else torch.device('cpu')
 
-model = get_maskrcnn(num_classes=3, pretrained=True).to(device)
-state_dict = torch.load("models/model_version__2024_02_19___15_15_46_.pth")
+model = get_maskrcnn(num_classes=4, pretrained=True).to(device)
+state_dict = torch.load("models/model_version__2024_02_19___18_27_10_.pth")
 model.load_state_dict(state_dict)
 model.eval()
 
 dataset = ObjectDetection_DM(
     train_val_size=20,
-    img_size=200,
-    shapes_per_image=(1, 2),
-    class_probs=(1, 1, 0, 0, 0),
+    img_size=400,
+    shapes_per_image=(1, 3),
+    class_probs=(1, 1, 1, 0, 0),
     target_masks=True,
-    batch_size=4
+    batch_size=2
 )
 
 dataset.setup("fit")

@@ -132,7 +132,7 @@ class ObjectDetection_DS(CV_DS_Base):
                 indexes = torch.where(shape.squeeze() > threshold)
 
                 # set img to shape img where shape img has higher value then img
-                img[indexes] = self.rng.integers(gs_range[0], gs_range[1])
+                img[indexes] = self.rng.integers(gs_range[0], gs_range[1], (self.img_size, self.img_size))[indexes]
                 masks[i][indexes] = 1
 
             # Convert from np to torch and assign appropriate dtypes.
