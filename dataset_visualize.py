@@ -24,7 +24,6 @@ while True:
     try:
         imgs, targets = next(dataiter)
         device = torch.device('cuda') if torch.cuda.is_available() else torch.device('cpu')
-        # res = [imgs[i] for i in range(len(imgs))]
         display_imgs = imgs.type(torch.uint8)  # Convert display_imgs to uint8
         res = list(img.to(device) for img in display_imgs)
         res = display_boxes(res, targets, instance_seg_dm.class_map, fill=False)

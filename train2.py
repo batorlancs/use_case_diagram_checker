@@ -69,16 +69,15 @@ for epoch in range(num_epochs):
     # update the learning rate
     lr_scheduler.step()
     # evaluate on the test dataset
-    # evaluate(model, data_loader_test, device=device)
-    # with torch.no_grad():
-    #     for imgs, targets in data_loader_test:
-    #         imgs = list(img.to(device) for img in imgs)
-    #         targets = [{k: v.to(device) for k, v in t.items()} for t in targets]
-    #         model.eval()
-    #         output = model(imgs)
-    #         print("-" * 80)
-    #         print(output)
-    #         print("-" * 80)
+    with torch.no_grad():
+        for imgs, targets in data_loader_test:
+            imgs = list(img.to(device) for img in imgs)
+            targets = [{k: v.to(device) for k, v in t.items()} for t in targets]
+            model.eval()
+            output = model(imgs)
+            print("-" * 80)
+            print(output)
+            print("-" * 80)
 
 print("That's it!")
 print("Saving model...")
