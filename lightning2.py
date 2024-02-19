@@ -5,8 +5,6 @@ from torchvision.models.detection.faster_rcnn import FastRCNNPredictor
 from torchvision.models.detection.mask_rcnn import MaskRCNNPredictor
 from torchmetrics.detection.mean_ap import MeanAveragePrecision
 
-import torch.nn.functional as F
-
 class InstanceSeg_LM(pl.LightningModule):
 
     def __init__(self, num_classes = 4, pretrained = True, lr = 3e-4,):

@@ -95,8 +95,7 @@ class Draw:
         while True:
             a, b = self.rng.integers(
                 low=self.img_min_padding, high=self.img_size-self.img_min_padding, size=2)
-            c, d = self.rng.integers(
-                low=self.img_min_padding, high=self.img_size-self.img_min_padding, size=2)
+            c, d = self.rng.integers(low=self.img_min_padding, high=self.img_size-self.img_min_padding, size=2)
             vx = c - a
             vy = d - b
             if abs(vx) > minimum_gap and abs(vy) > minimum_gap:

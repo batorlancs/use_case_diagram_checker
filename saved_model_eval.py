@@ -6,7 +6,7 @@ from torchvision.utils import make_grid
 device = torch.device('cuda') if torch.cuda.is_available() else torch.device('cpu')
 
 model = get_maskrcnn(num_classes=3, pretrained=True).to(device)
-state_dict = torch.load("models/model_version__2024_02_14___00_31_39_.pth")
+state_dict = torch.load("models/model_version__2024_02_19___15_15_46_.pth")
 model.load_state_dict(state_dict)
 model.eval()
 

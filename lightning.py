@@ -68,7 +68,7 @@ class ObjectDetection_DM(pl.LightningDataModule):
         shapes_per_image=(1, 3),
         class_probs=(1, 1, 1, 1, 1),
         rand_seed=12345,
-        class_map={
+        class_map = {
             0: {
                 "name": "background",
                 "gs_range": (200, 255),
@@ -82,9 +82,10 @@ class ObjectDetection_DM(pl.LightningDataModule):
         },
         target_masks=False,
     ):
-
         super().__init__()
-
+        self.test = None
+        self.val = None
+        self.train = None
         if sorted(list(dataloader_shuffle.keys())) != sorted(["train", "val", "test"]):
             raise ValueError(
                 "Dict dataloader_shuffle must contain the keys: train, val, test."
@@ -194,7 +195,8 @@ class ObjectDetection_DM(pl.LightningDataModule):
     def test_dataloader(self):
         return DataLoader(
             self.test,
-            batch_size=self.batch_size,
+            # batch_size=self.batch_size,
+            batch_size=1,
             shuffle=self.dataloader_shuffle["test"],
             collate_fn=self.custom_collate,
         )
